@@ -14,8 +14,8 @@ class Move:
 
     # "(old) -> (new)" in weird backwards format (col, row)
     def __str__(self):
-        return "(%i, %i) -> (%i, %i)" % \
-               (self.old[1], self.old[0], self.new[1], self.new[0])
+        return "%s -> %s" % \
+               (self.old, self.new)
 
     # returns all positions that are one step away (N, E, S, W),
     # or just the step in that particular direction 0-3

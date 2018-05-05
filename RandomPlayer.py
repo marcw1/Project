@@ -12,11 +12,15 @@ import random
 class Player(AbstractPlayer):
     
     def action(self, turns):
-        if turns < self.PLACING_PHASE_MOVES:
+        if self.phase == 'placing':
+            if turns >= self.PLACING_PHASE_MOVES-2:
+                self.phase = 'moving'
             move = random.choice(self.board.getPossiblePiecePlaces(self.colour))
             self.board.addPiece(self.colour, *move)
             return move
-        else:
+        elif self.phase == 'moving':
             move = random.choice(self.board.checkMoves(self.colour))
+            self.board.makeMove(move)
+            print(move)
             return (move.full)
             

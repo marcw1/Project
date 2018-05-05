@@ -6,10 +6,8 @@ class AbstractPlayer(ABC):
     colour = ""
     enemyColour = ""
     COLOURS = ("white", "black")
-    board = None
     PLACING_PHASE_MOVES = 24
-    phase = "placing"
-
+    phase = 'placing'
 
     def __init__(self, colour):
         self.colour = colour
@@ -28,10 +26,9 @@ class AbstractPlayer(ABC):
         #if action is a placement
         if isinstance(action[0], int):
             self.board.addPiece(self.enemyColour, *action)
-            print(self.board)
         #if action is a move
         else:
-            self.board = self.board.makeMove(Move(*action))
+            self.board.makeMove(Move(*action))
             
 
 
