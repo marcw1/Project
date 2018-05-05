@@ -31,7 +31,7 @@ class Board:
     def __str__(self):
         """String representation of the current board state."""
         for row in self.board:
-            print(*row)
+            print(row)
 
 
     def _within_board(self, x, y):
