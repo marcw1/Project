@@ -49,7 +49,7 @@ class Board:
         :return: True iff the coordinate is on the board
         """
         for coord in [y, x]:
-            if coord < 0 or coord > 7:
+            if coord < 0 + self.n_shrinks or coord > 7 - self.n_shrinks:
                 return False
         if self.board[y][x] == ' ':
             return False
@@ -73,7 +73,7 @@ class Board:
         return possibleMoves
 
 
-    def _shrink_board(self):
+    def shrink_board(self):
         """
         Shrink the board, eliminating all pieces along the outermost layer,
         and replacing the corners.

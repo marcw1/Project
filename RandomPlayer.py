@@ -19,8 +19,9 @@ class Player(AbstractPlayer):
             self.board.addPiece(self.colour, *move)
             return move
         elif self.phase == 'moving':
+            if turns in [128, 129, 192, 193]:
+                self.board.shrink_board()
             move = random.choice(self.board.checkMoves(self.colour))
             self.board.makeMove(move)
-            print(move)
             return (move.full)
             
