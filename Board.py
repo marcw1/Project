@@ -29,8 +29,15 @@ class Board:
     # returns formatted string of current board state
     def __str__(self):
         """String representation of the current board state."""
-        for row in self.board:
-            print(*row)
+        string = "" 
+        for i in range(8):
+            for j in range(8):
+                string += self.board[i][j]
+                if j < 7:
+                    string += " "
+                else:
+                    string += "\n"
+        return string
 
 
     def _within_board(self, x, y):
@@ -58,10 +65,10 @@ class Board:
                 xb, yb = xa + dx, ya + dy
                 xc, yc = xa + 2*dx, ya + 2*dy
                 if self._within_board(xb, yb) and self.board[yb][xb] == '-':
-                    move = Move((xa, ya), (yb, xb))
+                    move = Move((xa, ya), (xb, yb))
                     possibleMoves.append(move)
                 elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
-                    move = Move((xa, ya), (yc, xc))
+                    move = Move((xa, ya), (xc, yc))
                     possibleMoves.append(move)
         return possibleMoves
 
@@ -135,19 +142,25 @@ class Board:
     # makes a move on the board
     def makeMove(self, move):
         #move the piece
-        piece = self.board[move.old[0]][move.old[1]]
-        self.board[move.old[0]][move.old[1]] = '-'
-        self.board[move.new[0]][move.new[0]] = piece
+        piece = self.board[move.old[1]][move.old[0]]
+        self.board[move.old[1]][move.old[0]] = '-'
+        self.board[move.new[1]][move.new[0]] = piece
         #eliminate
         self._eliminate_about(move.new[0], move.new[1])
        
     
 
     # finds all locations where a piece can be placed
-    def getPossiblePiecePlaces(self):
+    def getPossiblePiecePlaces(self, colour):
         possiblePlaces = []
+        if colour == "white":
+            yMin = 0 + self.n_shrinks
+            yMax = 6
+        elif colour == "black":
+            yMin = 3
+            yMax = 8 - self.n_shrinks
         for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
-            for y in range(0 + self.n_shrinks, 8 - self.n_shrinks):
+            for y in range(yMin, yMax):
                 if self.board[y][x] == "-":
                     possiblePlaces.append((x, y))
         return possiblePlaces

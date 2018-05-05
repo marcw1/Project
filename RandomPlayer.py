@@ -13,9 +13,10 @@ class Player(AbstractPlayer):
     
     def action(self, turns):
         if turns < self.PLACING_PHASE_MOVES:
-            move = random.choice(self.board.getPossiblePiecePlaces())
+            move = random.choice(self.board.getPossiblePiecePlaces(self.colour))
+            self.board.addPiece(self.colour, *move)
             return move
         else:
-            move = random.choice(self.board.getMoves(self.colour))
-            return move
+            move = random.choice(self.board.checkMoves(self.colour))
+            return (move.full)
             

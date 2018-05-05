@@ -5,10 +5,12 @@ class Move:
     # old and new positions as tuples
     old = None
     new = None
+    full = None
 
     def __init__(self, old, new):
         self.old = old
         self.new = new
+        self.full = (self.old, self.new)
 
     # "(old) -> (new)" in weird backwards format (col, row)
     def __str__(self):
