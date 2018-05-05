@@ -4,7 +4,7 @@ from Move import Move
 class Board:
     
     n_shrinks = 0
-    numberPieces = {'@': 0, 'O': 0}
+    pieces = {'@': 0, 'O': 0}
     DISPLAY = {'black': '@', 'white': 'O', 'X': 'X'}
 
     # makes an empty board

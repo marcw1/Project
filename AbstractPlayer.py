@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 class AbstractPlayer(ABC):
     colour = ""
-    currentBoard = None
+    board = None
     BOARD_SIZE = 64
     PLACING_PHASE_MOVES = 24
     phase = "placing"
@@ -13,7 +13,7 @@ class AbstractPlayer(ABC):
 
     def __init__(self, colour):
         self.colour = colour
-        self.currentBoard = Board(self.BOARD_SIZE)
+        self.board = Board()
 
     # returns an action (placement or movement)
     @abstractmethod
@@ -22,13 +22,12 @@ class AbstractPlayer(ABC):
 
     # updates the board state based on an action
     def update(self, action):
-        count = sum([len(t) for t in action])
         #if action is a move
-        if count == 4:
-            self.board = self.board.makeMove(Move(*action))
-        #if action is a placement
-        elif count == 2:
+        if isinstance(action[0], int):
             self.board.addPiece(self.colour, *action)
+        #if action is a placement
+        else:
+            self.board = self.board.makeMove(Move(*action))
             
 
 
