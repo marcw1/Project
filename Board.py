@@ -2,18 +2,18 @@ from Move import Move
 
 
 class Board:
-    size = None
-    board = None
+    
     n_shrinks = 0
-    pieces = {'W': 0, 'B': 0}
+    numberPieces = {'@': 0, 'O': 0}
+    DISPLAY = {'black': '@', 'white': 'O', 'X': 'X'}
 
     # makes an empty board
-    def __init__(self, size):
+    def __init__(self):
         self.board = [['-' for _ in range(8)] for _ in range(8)]
         for square in [(0, 0), (7, 0), (7, 7), (0, 7)]:
             x, y = square
             self.board[y][x] = 'X'
-        self.n_shrinks = 0
+
 
     def _squares_with_piece(self, piece):
         """
@@ -48,21 +48,23 @@ class Board:
             return False
         return True
 
-    # pinched from referee
-    def checkMoves(self, piece):
+
+    # returns a list of possible moves
+    def checkMoves(self, colour):
         possibleMoves = []
-        for xa, ya in self._squares_with_piece(piece):
+        for xa, ya in self._squares_with_piece(self.DISPLAY[colour]):
             for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
                 # is the adjacent square unoccupied?
                 xb, yb = xa + dx, ya + dy
                 xc, yc = xa + 2*dx, ya + 2*dy
                 if self._within_board(xb, yb) and self.board[yb][xb] == '-':
-                    move = (yb, xb)
+                    move = Move((xa, ya), (yb, xb))
+                    possibleMoves.append(move)
                 elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
-                    move = (yc, xc)
-                    print(move)
-                possibleMoves.append(move)
-        print([possibleMoves[i:i + 2] for i in range(0, len(possibleMoves), 2)])
+                    move = Move((xa, ya), (yc, xc))
+                    possibleMoves.append(move)
+        return possibleMoves
+
 
     def _shrink_board(self):
         """
@@ -124,45 +126,31 @@ class Board:
         return hash(str(self))
 
     # adds a piece to the board, returns that piece
-    def addPiece(self, team, x, y):
+    def addPiece(self, colour, x, y):
         if self.board[y][x] == "-":
-            self.board[y][x] = team
+            self.board[y][x] = self.DISPLAY[colour]
             self._eliminate_about(x, y)
 
-    # returns list of all moves available
-    def getMoves(self, team):
-        moves = []
-        for piece in self.pieces[team]:
-            for move in piece.getMoves(self):
-                moves.append(move)
-        return moves
 
-    # returns a new Board object after move has been made
+    # makes a move on the board
     def makeMove(self, move):
-        newBoard = Board(self.size)
-        for teamPieces in self.pieces.values():
-            for p in teamPieces:
-                newBoard.addPiece(p.team, p.loc[0], p.loc[1])
-        # moves the piece
-        pieceToMove = newBoard.board[move.old[0]][move.old[1]]
-        newBoard.board[move.old[0]][move.old[1]] = None
-        newBoard.board[move.new[0]][move.new[1]] = pieceToMove
-        pieceToMove.loc = move.new
+        #move the piece
+        piece = self.board[move.old[0]][move.old[1]]
+        self.board[move.old[0]][move.old[1]] = '-'
+        self.board[move.new[0]][move.new[0]] = piece
+        #eliminate
+        self._eliminate_about(move.new[0], move.new[1])
+       
+    
 
-        # eliminates pieces
-        for step in Move.oneStep(move.new):
-            newBoard.eliminate(*step)
-        newBoard.eliminate(*move.new)
-
-        return newBoard
-
+    # finds all locations where a piece can be placed
     def getPossiblePiecePlaces(self):
-        possibleMoves = []
+        possiblePlaces = []
         for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
             for y in range(0 + self.n_shrinks, 8 - self.n_shrinks):
                 if self.board[y][x] == "-":
-                    possibleMoves.append((x, y))
-        return possibleMoves
+                    possiblePlaces.append((x, y))
+        return possiblePlaces
 
     # Used for scoring
     def loopThrough(self, method):
@@ -195,7 +183,6 @@ class Board:
                     self.board[target_y][target_x] = '-'
                     self.pieces[targetval] -= 1
                     gotKill = 1
-                    print("kill")
 
         gotKilled = 0
         # Check if the current piece is surrounded and should be eliminated
@@ -204,9 +191,6 @@ class Board:
                 self.board[y][x] = '-'
                 self.pieces[piece] -= 1
                 gotKilled = 1
-                print("killed")
-        if (gotKill == 1 or gotKilled == 1):
-            print("gotKill: ", gotKill, "gotKilled: ", gotKilled)
         return gotKill, gotKilled
 
     def _enemies(self, piece):
@@ -216,10 +200,10 @@ class Board:
         :param piece: the type of piece ('B', 'W', or 'X')
         :return: set of piece types that can eliminate a piece of this type
         """
-        if piece == 'B':
-            return {'W', 'X'}
-        elif piece == 'W':
-            return {'B', 'X'}
+        if piece == '@':
+            return {'O', 'X'}
+        elif piece == 'O':
+            return {'@', 'X'}
         return set()
 
     def _targets(self, piece):
@@ -229,11 +213,11 @@ class Board:
         :param piece: the type of piece ('B', 'W', or 'X')
         :return: the set of piece types that a piece of this type can eliminate
         """
-        if piece == 'B':
-            return {'W'}
-        elif piece == 'W':
-            return {'B'}
+        if piece == '@':
+            return {'O'}
+        elif piece == 'O':
+            return {'@'}
         elif piece == 'X':
-            return {'B', 'W'}
+            return {'@', 'O'}
         return set()
 

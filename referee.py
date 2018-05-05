@@ -7,12 +7,12 @@ import argparse
 import importlib
 
 VERSION_INFO = """Referee version 1.1 (released Apr 08 2018)
-Plays a basic game of Watch Your Back! between two Player classes
+Plays a basic game of Watch Your Back! between two AbstractPlayer classes
 Run `python referee.py -h` for help and additional usage information
 """
 
 def main():
-    """Coordinate a game of Watch Your Back! between two Player classes."""
+    """Coordinate a game of Watch Your Back! between two AbstractPlayer classes."""
 
     # load command-line options for the game and print welcome message
     options = _Options()
@@ -63,11 +63,11 @@ class _Options:
     --- help message: ---
     usage: referee.py [-h] [-d [DELAY]] white_module black_module
 
-    Plays a basic game of Watch Your Back! between two Player classes
+    Plays a basic game of Watch Your Back! between two AbstractPlayer classes
 
     positional arguments:
-      white_module          full name of module containing White Player class
-      black_module          full name of module containing Black Player class
+      white_module          full name of module containing White AbstractPlayer class
+      black_module          full name of module containing Black AbstractPlayer class
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -78,11 +78,11 @@ class _Options:
     def __init__(self):
         parser = argparse.ArgumentParser(
                 description="Plays a game of Watch Your Back! between two "
-                    "Player classes")
+                    "AbstractPlayer classes")
         parser.add_argument('white_module',
-                help="full name of module containing White Player class")
+                help="full name of module containing White AbstractPlayer class")
         parser.add_argument('black_module',
-                help="full name of module containing Black Player class")
+                help="full name of module containing Black AbstractPlayer class")
         parser.add_argument('-d', '--delay',
                 type=float, default=DELAY_DEFAULT, nargs="?",
                 help="how long (float, seconds) to wait between turns")
@@ -97,11 +97,11 @@ class _Options:
 
 def _load_player(modulename, package='.'):
     """
-    Load a Player class given the name of a module.
+    Load a AbstractPlayer class given the name of a module.
     
-    :param modulename: where to look for the Player class (name of a module)
+    :param modulename: where to look for the AbstractPlayer class (name of a module)
     :param package: where to look for the module (relative package)
-    :return: the Player class (a class object)
+    :return: the AbstractPlayer class (a class object)
     """
     module = importlib.import_module(modulename, package=package)
     player_class = module.Player
@@ -496,7 +496,7 @@ class _Game:
 # HELPER CLASSES
 
 class _Player:
-    """Wrapper for a Player class to simplify initialization"""
+    """Wrapper for a AbstractPlayer class to simplify initialization"""
     def __init__(self, player_class, colour):
         self.player = player_class(colour)
     def update(self, move):
