@@ -32,10 +32,10 @@ class Node:
         + str(self.total)
         return myString
 
-    # returns a list of child nodes as a result of making all possible moves
+    # returns a list of child nodes as a result of making all possible actions
     def expand(self):
         children = []
-        moves = self.board.getMoves("O")
+        moves = self.board.checkActions()
         for move in moves:
             newBoard = self.board.makeMove(move)
             child = Node(self, self.cost + 1, self.cost + 1, newBoard, move)

@@ -1,17 +1,21 @@
-from Move import Move
-
+from itertools import cycle
 
 class Board:
     
-    n_shrinks = 0
-    pieces = {'@': 0, 'O': 0}
     DISPLAY = {'black': '@', 'white': 'O', 'X': 'X'}
-    phase = 'placing'
-    turns = 0
-    current_team = 'white'
+    colours = ('white', 'black')
 
     # makes an empty board
     def __init__(self):
+        
+        self.n_shrinks = 0
+        self.pieces = {'@': 0, 'O': 0}
+        self.phase = 'placing'
+        self.turns = 0
+        # makes an iterator to cycle through teams
+        self.team_iterator = cycle(Board.colours)
+        self.current_team = next(self.team_iterator)
+        
         self.board = [['-' for _ in range(8)] for _ in range(8)]
         for square in [(0, 0), (7, 0), (7, 7), (0, 7)]:
             x, y = square
@@ -66,6 +70,8 @@ class Board:
         # otherwise move the piece
         else:
             self.movePiece(*action)
+        # cycles to next team
+        self.current_team = next(self.team_iterator)
        
     # adds a piece to the board
     def addPiece(self, colour, x, y):
