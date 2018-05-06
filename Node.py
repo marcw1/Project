@@ -2,11 +2,11 @@ from copy import deepcopy
 
 class Node:
 
-    def __init__(self, pred, wins, visits, board, action):
+    def __init__(self, pred, board, action):
         self.pred = pred
         self.children = []
-        self.wins = wins
-        self.visits = visits
+        self.wins = 0
+        self.visits = 0
         self.board = board
         self.action = action
 
@@ -24,11 +24,11 @@ class Node:
         + str(self.total)
         return myString
 
-    # returns a list of child nodes as a result of making all possible actions
+    # creates list of child nodes as a result of making all possible actions
     def expand(self):
         actions = self.board.checkActions()
         for action in actions:
             newBoard = deepcopy(self.board)
             newBoard.doAction(action)
-            child = Node(self, 0, 0, newBoard, action)
+            child = Node(self, newBoard, action)
             self.children.append(child)

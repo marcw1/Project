@@ -15,12 +15,3 @@ class AbstractPlayer(ABC):
     # updates the board state based on an action
     def update(self, action):
         self.board.doAction(action)
-      
-    # returns list of all possible actions      
-    def _get_all_moves(self, turns):
-        if turns in [128, 129] and self.board.n_shrinks == 0:
-            self.board.shrink_board()
-        elif turns in [192, 193] and self.board.n_shrinks == 1:
-            self.board.shrink_board()
-        actions = self.board.checkActions()
-        return actions

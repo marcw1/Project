@@ -2,7 +2,7 @@ from itertools import cycle
 
 class Board:
 
-    colours = ('O', '@')
+    teams = ('O', '@')
 
     # makes an empty board
     def __init__(self):
@@ -12,7 +12,7 @@ class Board:
         self.phase = 'placing'
         self.turns = 0
         # makes an iterator to cycle through teams
-        self.team_iterator = cycle(Board.colours)
+        self.team_iterator = cycle(Board.teams)
         self.current_team = next(self.team_iterator)
         
         self.board = [['-' for _ in range(8)] for _ in range(8)]
@@ -63,16 +63,25 @@ class Board:
     # does an action on the board, whether its a move or a placement
     def doAction(self, action):
         
+        # checks for pass
+        if action is None:
+            pass
         # checks if action is piece placement
-        if isinstance(action[0], int):
+        elif isinstance(action[0], int):
             self.addPiece(*action)
         # otherwise move the piece
         else:
             self.movePiece(*action)
         # cycles to next team
         self.current_team = next(self.team_iterator)
-     #   for piece in self.pieces:
-     #       print(piece, self.pieces[piece])
+        self.turns += 1
+        # checks for phase change
+        if self.turns == 24 and self.phase == 'placing':
+            self.phase = 'moving'
+            self.turns = 0
+        # checks for board shrink
+        elif self.turns in [128, 192]:
+            self._shrink_board()
        
     # adds a piece to the board
     def addPiece(self, x, y):
@@ -131,7 +140,7 @@ class Board:
 
 
 
-    def shrink_board(self):
+    def _shrink_board(self):
         """
         Shrink the board, eliminating all pieces along the outermost layer,
         and replacing the corners.
@@ -270,12 +279,14 @@ class Board:
         """
         n_whites = self.pieces['O']
         n_blacks = self.pieces['@']
-        if n_whites >= 2 and n_blacks >= 2:
-            winner = None
-        elif n_whites < 2 and n_blacks >= 2:
-            winner = '@'
-        elif n_blacks < 2 and n_whites >= 2:
-            winner = 'O'
-        elif n_whites < 2 and n_blacks < 2:
-            self.winner = 'draw'
+        winner = None
+        if self.phase == 'moving':
+            if n_whites >= 2 and n_blacks >= 2:
+                winner = None
+            elif n_whites < 2 and n_blacks >= 2:
+                winner = '@'
+            elif n_blacks < 2 and n_whites >= 2:
+                winner = 'O'
+            elif n_whites < 2 and n_blacks < 2:
+                self.winner = 'draw'
         return winner

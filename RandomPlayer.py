@@ -13,12 +13,11 @@ class Player(AbstractPlayer):
     
     def action(self, turns):
         
-        move = random.choice(self._get_all_moves(turns))
-        self.board.doAction(move)
-        
-        # checks to change to moving phase
-        if turns in [22, 23]:
-            self.board.phase = 'moving'
+        actions = self.board.checkActions()
+        action = None
+        if len(actions) > 0:
+            action = random.choice(actions)
+        self.board.doAction(action)
             
-        return move
+        return action
             
