@@ -28,7 +28,7 @@ class Player(AbstractPlayer):
          
         maxScore = 0
         for node in expanded:
-            if node.wins/node.visits > maxScore:
+            if node.wins/node.visits >= maxScore:
                 maxScore = node.wins/node.visits
                 bestNode = node
         
@@ -59,7 +59,6 @@ class Player(AbstractPlayer):
             if len(actions) > 0:
                 action = random.choice(board.checkActions())      
             board.doAction(action)
-           # print(board)
             winner = board.check_winner()
             
         if winner == node.board.current_team:

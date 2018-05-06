@@ -288,5 +288,5 @@ class Board:
             elif n_blacks < 2 and n_whites >= 2:
                 winner = 'O'
             elif n_whites < 2 and n_blacks < 2:
-                self.winner = 'draw'
+                winner = 'draw'
         return winner
