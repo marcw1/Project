@@ -1,15 +1,4 @@
 class Node:
-    
-    # predecessor
-    pred = None
-    # path cost g(n)
-    cost = 0
-    # estimated total cost f(n)
-    total = 0
-    # board state
-    board = None
-    # last move made to get here
-    move = None
 
     def __init__(self, pred, cost, total, board, move):
         self.pred = pred

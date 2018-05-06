@@ -21,19 +21,19 @@ class Board:
             x, y = square
             self.board[y][x] = 'X'
      
-    # finds all possible actions for a colour       
-    def checkActions(self, colour):
+    # finds all possible actions for current team     
+    def checkActions(self):
         if self.phase == 'placing':
-            possibleActions = self.checkPiecePlaces(colour)
+            possibleActions = self.checkPiecePlaces()
         elif self.phase == 'moving':
-            possibleActions = self.checkMoves(colour)
+            possibleActions = self.checkMoves()
         return possibleActions
 
 
-    # returns a list of possible moves for a colour
-    def checkMoves(self, colour):
+    # returns a list of possible moves for current team
+    def checkMoves(self):
         possibleMoves = []
-        for xa, ya in self._squares_with_piece(self.DISPLAY[colour]):
+        for xa, ya in self._squares_with_piece(self.DISPLAY[self.current_team]):
             for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
                 # is the adjacent square unoccupied?
                 xb, yb = xa + dx, ya + dy
@@ -47,12 +47,12 @@ class Board:
         return possibleMoves
     
         # finds all locations where a piece can be placed
-    def checkPiecePlaces(self, colour):
+    def checkPiecePlaces(self):
         possiblePlaces = []
-        if colour == "white":
+        if self.current_team == "white":
             yMin = 0 + self.n_shrinks
             yMax = 6
-        elif colour == "black":
+        elif self.current_team == "black":
             yMin = 3
             yMax = 8 - self.n_shrinks
         for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
@@ -62,11 +62,11 @@ class Board:
         return possiblePlaces
     
     # does an action on the board, whether its a move or a placement
-    def doAction(self, colour, action):
+    def doAction(self, action):
         
         # checks if action is piece placement
         if isinstance(action[0], int):
-            self.addPiece(colour, *action)
+            self.addPiece(*action)
         # otherwise move the piece
         else:
             self.movePiece(*action)
@@ -74,9 +74,9 @@ class Board:
         self.current_team = next(self.team_iterator)
        
     # adds a piece to the board
-    def addPiece(self, colour, x, y):
+    def addPiece(self, x, y):
         if self.board[y][x] == "-":
-            self.board[y][x] = self.DISPLAY[colour]
+            self.board[y][x] = self.DISPLAY[self.current_team]
             self._eliminate_about(x, y)
 
     # moves a piece

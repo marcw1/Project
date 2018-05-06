@@ -23,7 +23,7 @@ class AbstractPlayer(ABC):
 
     # updates the board state based on an action
     def update(self, action):
-        self.board.doAction(self.enemyColour, action)
+        self.board.doAction(action)
       
     # returns list of all possible actions      
     def _get_all_moves(self, turns):
@@ -31,5 +31,5 @@ class AbstractPlayer(ABC):
             self.board.shrink_board()
         elif turns in [192, 193] and self.board.n_shrinks == 1:
             self.board.shrink_board()
-        actions = self.board.checkActions(self.colour)
+        actions = self.board.checkActions()
         return actions

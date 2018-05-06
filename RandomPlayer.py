@@ -14,7 +14,7 @@ class Player(AbstractPlayer):
     def action(self, turns):
         
         move = random.choice(self._get_all_moves(turns))
-        self.board.doAction(self.colour, move)
+        self.board.doAction(move)
         
         # checks to change to moving phase
         if turns in [22, 23]:
