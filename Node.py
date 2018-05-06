@@ -1,4 +1,5 @@
 from copy import deepcopy
+import random
 
 class Node:
 
@@ -9,6 +10,12 @@ class Node:
         self.visits = 0
         self.board = board
         self.action = action
+        if pred is None:
+            self.depth = 0
+        else:
+            self.depth = pred.depth + 1
+        self.untriedActions = self.board.checkActions()
+        random.shuffle(self.untriedActions)
 
     # used for min heap
     def __lt__(self, other):
@@ -19,16 +26,14 @@ class Node:
         return hash(self.board)
 
     def __str__(self):
-        myString = str(self.board) + "move: " + str(self.move) + "\ncost: "
-        + str(self.cost) + "\nest: " + str(self.total - self.cost) + "\ntotal: "
-        + str(self.total)
+        myString = "move: " + str(self.action) + '\n wins:' + str(self.wins) + '\n visits:' + str(self.visits) + '\n depth:' + str(self.depth)
         return myString
 
-    # creates list of child nodes as a result of making all possible actions
+    # randomly expands an action to return a child node
     def expand(self):
-        actions = self.board.checkActions()
-        for action in actions:
-            newBoard = deepcopy(self.board)
-            newBoard.doAction(action)
-            child = Node(self, newBoard, action)
-            self.children.append(child)
+        action = self.untriedActions.pop()
+        newBoard = deepcopy(self.board)
+        newBoard.doAction(action)
+        child = Node(self, newBoard, action)
+        self.children.append(child)
+        return child
