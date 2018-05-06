@@ -1,19 +1,10 @@
 from Board import Board
-from Move import Move
 from abc import ABC, abstractmethod
 
 class AbstractPlayer(ABC):
-    colour = ""
-    enemyColour = ""
-    COLOURS = ("white", "black")
-    PLACING_PHASE_MOVES = 24
-    phase = 'placing'
 
     def __init__(self, colour):
         self.colour = colour
-        for colour in self.COLOURS:
-            if colour != self.colour:
-                self.enemyColour = colour
         self.board = Board()
 
     # returns an action (placement or movement)

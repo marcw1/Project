@@ -1,9 +1,8 @@
 from itertools import cycle
 
 class Board:
-    
-    DISPLAY = {'black': '@', 'white': 'O', 'X': 'X'}
-    colours = ('white', 'black')
+
+    colours = ('O', '@')
 
     # makes an empty board
     def __init__(self):
@@ -33,7 +32,7 @@ class Board:
     # returns a list of possible moves for current team
     def checkMoves(self):
         possibleMoves = []
-        for xa, ya in self._squares_with_piece(self.DISPLAY[self.current_team]):
+        for xa, ya in self._squares_with_piece(self.current_team):
             for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
                 # is the adjacent square unoccupied?
                 xb, yb = xa + dx, ya + dy
@@ -46,13 +45,13 @@ class Board:
                     possibleMoves.append(move)
         return possibleMoves
     
-        # finds all locations where a piece can be placed
+    # finds all locations where a piece can be placed
     def checkPiecePlaces(self):
         possiblePlaces = []
-        if self.current_team == "white":
+        if self.current_team == 'O':
             yMin = 0 + self.n_shrinks
             yMax = 6
-        elif self.current_team == "black":
+        elif self.current_team == '@':
             yMin = 3
             yMax = 8 - self.n_shrinks
         for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
@@ -72,11 +71,14 @@ class Board:
             self.movePiece(*action)
         # cycles to next team
         self.current_team = next(self.team_iterator)
+     #   for piece in self.pieces:
+     #       print(piece, self.pieces[piece])
        
     # adds a piece to the board
     def addPiece(self, x, y):
         if self.board[y][x] == "-":
-            self.board[y][x] = self.DISPLAY[self.current_team]
+            self.board[y][x] = self.current_team
+            self.pieces[self.current_team] += 1
             self._eliminate_about(x, y)
 
     # moves a piece
@@ -257,4 +259,23 @@ class Board:
         elif piece == 'X':
             return {'@', 'O'}
         return set()
+    
+    def check_winner(self):
+        """
+        Check the board to see if the game has concluded.
 
+        Count the number of pieces remaining for each player: if either player 
+        has run out of pieces, decide the winner and transition to the 
+        'completed' state
+        """
+        n_whites = self.pieces['O']
+        n_blacks = self.pieces['@']
+        if n_whites >= 2 and n_blacks >= 2:
+            winner = None
+        elif n_whites < 2 and n_blacks >= 2:
+            winner = '@'
+        elif n_blacks < 2 and n_whites >= 2:
+            winner = 'O'
+        elif n_whites < 2 and n_blacks < 2:
+            self.winner = 'draw'
+        return winner

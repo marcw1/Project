@@ -1,11 +1,14 @@
+from copy import deepcopy
+
 class Node:
 
-    def __init__(self, pred, cost, total, board, move):
+    def __init__(self, pred, wins, visits, board, action):
         self.pred = pred
-        self.cost = cost
-        self.total = total
+        self.children = []
+        self.wins = wins
+        self.visits = visits
         self.board = board
-        self.move = move
+        self.action = action
 
     # used for min heap
     def __lt__(self, other):
@@ -23,10 +26,9 @@ class Node:
 
     # returns a list of child nodes as a result of making all possible actions
     def expand(self):
-        children = []
-        moves = self.board.checkActions()
-        for move in moves:
-            newBoard = self.board.makeMove(move)
-            child = Node(self, self.cost + 1, self.cost + 1, newBoard, move)
-            children.append(child)
-        return children
+        actions = self.board.checkActions()
+        for action in actions:
+            newBoard = deepcopy(self.board)
+            newBoard.doAction(action)
+            child = Node(self, 0, 0, newBoard, action)
+            self.children.append(child)
