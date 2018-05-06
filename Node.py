@@ -1,4 +1,5 @@
 class Node:
+    
     # predecessor
     pred = None
     # path cost g(n)
@@ -31,8 +32,7 @@ class Node:
         + str(self.total)
         return myString
 
-    # returns a list of child nodes as a result of making all possible moves \
-    # for "O" team
+    # returns a list of child nodes as a result of making all possible moves
     def expand(self):
         children = []
         moves = self.board.getMoves("O")

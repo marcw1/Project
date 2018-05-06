@@ -6,6 +6,9 @@ class Board:
     n_shrinks = 0
     pieces = {'@': 0, 'O': 0}
     DISPLAY = {'black': '@', 'white': 'O', 'X': 'X'}
+    phase = 'placing'
+    turns = 0
+    current_team = 'white'
 
     # makes an empty board
     def __init__(self):
@@ -13,7 +16,70 @@ class Board:
         for square in [(0, 0), (7, 0), (7, 7), (0, 7)]:
             x, y = square
             self.board[y][x] = 'X'
+     
+    # finds all possible actions for a colour       
+    def checkActions(self, colour):
+        if self.phase == 'placing':
+            possibleActions = self.checkPiecePlaces(colour)
+        elif self.phase == 'moving':
+            possibleActions = self.checkMoves(colour)
+        return possibleActions
 
+
+    # returns a list of possible moves for a colour
+    def checkMoves(self, colour):
+        possibleMoves = []
+        for xa, ya in self._squares_with_piece(self.DISPLAY[colour]):
+            for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+                # is the adjacent square unoccupied?
+                xb, yb = xa + dx, ya + dy
+                xc, yc = xa + 2*dx, ya + 2*dy
+                if self._within_board(xb, yb) and self.board[yb][xb] == '-':
+                    move = ((xa, ya), (xb, yb))
+                    possibleMoves.append(move)
+                elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
+                    move = ((xa, ya), (xc, yc))
+                    possibleMoves.append(move)
+        return possibleMoves
+    
+        # finds all locations where a piece can be placed
+    def checkPiecePlaces(self, colour):
+        possiblePlaces = []
+        if colour == "white":
+            yMin = 0 + self.n_shrinks
+            yMax = 6
+        elif colour == "black":
+            yMin = 3
+            yMax = 8 - self.n_shrinks
+        for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
+            for y in range(yMin, yMax):
+                if self.board[y][x] == "-":
+                    possiblePlaces.append((x, y))
+        return possiblePlaces
+    
+    # does an action on the board, whether its a move or a placement
+    def doAction(self, colour, action):
+        
+        # checks if action is piece placement
+        if isinstance(action[0], int):
+            self.addPiece(colour, *action)
+        # otherwise move the piece
+        else:
+            self.movePiece(*action)
+       
+    # adds a piece to the board
+    def addPiece(self, colour, x, y):
+        if self.board[y][x] == "-":
+            self.board[y][x] = self.DISPLAY[colour]
+            self._eliminate_about(x, y)
+
+    # moves a piece
+    def movePiece(self, moveFrom, moveTo):      
+        piece = self.board[moveFrom[1]][moveFrom[0]]      
+        self.board[moveFrom[1]][moveFrom[0]] = '-'
+        self.board[moveTo[1]][moveTo[0]] = piece
+        #eliminate
+        self._eliminate_about(moveTo[0], moveTo[1])      
 
     def _squares_with_piece(self, piece):
         """
@@ -55,22 +121,6 @@ class Board:
             return False
         return True
 
-
-    # returns a list of possible moves
-    def checkMoves(self, colour):
-        possibleMoves = []
-        for xa, ya in self._squares_with_piece(self.DISPLAY[colour]):
-            for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-                # is the adjacent square unoccupied?
-                xb, yb = xa + dx, ya + dy
-                xc, yc = xa + 2*dx, ya + 2*dy
-                if self._within_board(xb, yb) and self.board[yb][xb] == '-':
-                    move = Move((xa, ya), (xb, yb))
-                    possibleMoves.append(move)
-                elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
-                    move = Move((xa, ya), (xc, yc))
-                    possibleMoves.append(move)
-        return possibleMoves
 
 
     def shrink_board(self):
@@ -130,40 +180,8 @@ class Board:
 
     # checks if 2 boards are equivalent
     def __hash__(self):
-        return hash(str(self))
+        return hash(self.board)
 
-    # adds a piece to the board, returns that piece
-    def addPiece(self, colour, x, y):
-        if self.board[y][x] == "-":
-            self.board[y][x] = self.DISPLAY[colour]
-            self._eliminate_about(x, y)
-
-
-    # makes a move on the board
-    def makeMove(self, move):
-        #move the piece
-        piece = self.board[move.old[1]][move.old[0]]
-        self.board[move.old[1]][move.old[0]] = '-'
-        self.board[move.new[1]][move.new[0]] = piece
-        #eliminate
-        self._eliminate_about(move.new[0], move.new[1])
-       
-    
-
-    # finds all locations where a piece can be placed
-    def getPossiblePiecePlaces(self, colour):
-        possiblePlaces = []
-        if colour == "white":
-            yMin = 0 + self.n_shrinks
-            yMax = 6
-        elif colour == "black":
-            yMin = 3
-            yMax = 8 - self.n_shrinks
-        for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
-            for y in range(yMin, yMax):
-                if self.board[y][x] == "-":
-                    possiblePlaces.append((x, y))
-        return possiblePlaces
 
     # Used for scoring
     def loopThrough(self, method):

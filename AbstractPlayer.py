@@ -23,12 +23,13 @@ class AbstractPlayer(ABC):
 
     # updates the board state based on an action
     def update(self, action):
-        #if action is a placement
-        if isinstance(action[0], int):
-            self.board.addPiece(self.enemyColour, *action)
-        #if action is a move
-        else:
-            self.board.makeMove(Move(*action))
-            
-
-
+        self.board.doAction(self.enemyColour, action)
+      
+    # returns list of all possible actions      
+    def _get_all_moves(self, turns):
+        if turns in [128, 129] and self.board.n_shrinks == 0:
+            self.board.shrink_board()
+        elif turns in [192, 193] and self.board.n_shrinks == 1:
+            self.board.shrink_board()
+        actions = self.board.checkActions(self.colour)
+        return actions
