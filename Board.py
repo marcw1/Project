@@ -127,7 +127,8 @@ class Board:
     def addPiece(self, team, x, y):
         if self.board[y][x] == "-":
             self.board[y][x] = team
-            self._eliminate_about(x, y)
+            kills, killed = self._eliminate_about(x, y)
+        return kills, killed
 
     # returns list of all moves available
     def getMoves(self, team):
@@ -136,25 +137,6 @@ class Board:
             for move in piece.getMoves(self):
                 moves.append(move)
         return moves
-
-    # returns a new Board object after move has been made
-    def makeMove(self, move):
-        newBoard = Board(self.size)
-        for teamPieces in self.pieces.values():
-            for p in teamPieces:
-                newBoard.addPiece(p.team, p.loc[0], p.loc[1])
-        # moves the piece
-        pieceToMove = newBoard.board[move.old[0]][move.old[1]]
-        newBoard.board[move.old[0]][move.old[1]] = None
-        newBoard.board[move.new[0]][move.new[1]] = pieceToMove
-        pieceToMove.loc = move.new
-
-        # eliminates pieces
-        for step in Move.oneStep(move.new):
-            newBoard.eliminate(*step)
-        newBoard.eliminate(*move.new)
-
-        return newBoard
 
     def getPossiblePiecePlaces(self):
         possibleMoves = []
@@ -195,7 +177,6 @@ class Board:
                     self.board[target_y][target_x] = '-'
                     self.pieces[targetval] -= 1
                     gotKill = 1
-                    print("kill")
 
         gotKilled = 0
         # Check if the current piece is surrounded and should be eliminated
@@ -204,10 +185,87 @@ class Board:
                 self.board[y][x] = '-'
                 self.pieces[piece] -= 1
                 gotKilled = 1
-                print("killed")
-        if (gotKill == 1 or gotKilled == 1):
-            print("gotKill: ", gotKill, "gotKilled: ", gotKilled)
+
         return gotKill, gotKilled
+
+    def find_traps(self, piece):
+        traps = 0
+        for square in self._squares_with_piece(piece):
+            for dx, dy in [(-1, 0), (1, 0), (0, 1), (0, -1)]:
+                ax = square[0] + 2*dx
+                bx = square[1] + 2*dy
+
+                cx = square[0] + dx
+                dx = square[1] + dy
+                # include corners for ally traps
+                if self._within_board(ax, bx) and (self.board[bx][ax] == piece or self.board[bx][ax] == 'X') and self.board[dx][cx] == "-":
+                    if self.board[bx][ax] == piece:
+                        traps += 0.5
+                    else:
+                        traps+= 1
+        # each trap is doubled
+        return traps
+
+    def count_kill_positions(self, piece):
+        killPositions = 0
+
+        for square in self._squares_with_piece(piece):
+            x = square[0]
+            y = square[1]
+            for direction in [(1, 0), (0, 1)]:
+                dx = direction[0]
+                dy = direction[1]
+                xa, ya = x + dx, y + dy
+                firstval = None
+                if self._within_board(xa, ya):
+                    firstval = self.board[ya][xa]
+
+                xb, yb = x - dx, y - dy
+                secondval = None
+                if self._within_board(xb, yb):
+                    secondval = self.board[yb][xb]
+
+                # If both adjacent squares have enemies then this piece is surrounded!
+                piece = self.board[y][x]
+                enemies = self._enemies(piece)
+
+                surroundedSides = 0
+
+                if firstval in enemies:
+                    surroundedSides += 1
+                if secondval in enemies:
+                    surroundedSides += 1
+                if surroundedSides == 1 and (firstval == "-" or secondval == "-"):
+                    killPositions += 1
+
+        return killPositions
+
+    def evaluateBoard(self, playerPiece):
+        player = playerPiece
+        enemy = None
+        score = 0
+
+        if player == "W":
+            enemy = "B"
+        elif player == "B":
+            enemy = "W"
+
+        # Our traps
+        score += self.find_traps(player)
+
+        # Enemy traps
+        score -= self.find_traps(enemy)
+
+        # Positions to kill enemy
+        score -= self.count_kill_positions(player)
+
+        # Positions to kill player
+        score += self.count_kill_positions(enemy)
+
+        return score
+
+
+
 
     def _enemies(self, piece):
         """
