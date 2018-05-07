@@ -256,11 +256,17 @@ class Board:
         # Enemy traps
         score -= self.find_traps(enemy)
 
-        # Positions to kill enemy
+        # Positions to kill player
         score -= self.count_kill_positions(player)
 
-        # Positions to kill player
+        # Positions to kill enemy
         score += self.count_kill_positions(enemy)
+
+        # Player pieces
+        score += sum(1 for square in self._squares_with_piece(player))
+
+        # Enemy piece
+        score -= sum(2 for square in self._squares_with_piece(enemy))
 
         return score
 
