@@ -8,22 +8,25 @@ from Node import Node
 import random
 import time
 from copy import deepcopy
-from math import sqrt, log2
+from math import sqrt, log1p
 class Player(AbstractPlayer):
     
-    time_limit = 10
+    #time_limit = 0.5 
+    total_sim = 50
     UCTK = 1
+    simulations = 0
     
     def action(self, turns):
         
         #creates a root node
         root = Node(None, deepcopy(self.board), None)
+        node = root
         
         #keeps running MCTS until time is up
-        start_time = time.time()
-        expanded = []
-        node = root
-        while time.time() - start_time < self.time_limit:
+        '''start_time = time.time()
+        while time.time() - start_time < self.time_limit:'''
+        #keeps running MCTS until certain number of moves
+        for _ in range(self.total_sim):
             
             # Select)
             while node.untriedActions == [] and node.children != []: # node is fully expanded and non-terminal
@@ -38,6 +41,7 @@ class Player(AbstractPlayer):
     
             # Rollout
             winner = self.randomSimulation(node)
+            #winner = self.bestMoveSimulation(node)
     
             # Backpropagate
             while node.pred != None: # backpropagate from the expanded node and work back to the root node
@@ -48,7 +52,9 @@ class Player(AbstractPlayer):
             #print(node)
             
         action = sorted(root.children, key = lambda c: c.visits)[-1].action       
-        self.board.doAction(action)                 
+        self.board.doAction(action)
+        #print(self.simulations)
+        #self.simulations = 0            
         return action
     
 
@@ -57,7 +63,7 @@ class Player(AbstractPlayer):
         ''' selects a child node based on UCB1 formula
             exploration parameter UCTK
         '''
-        s = sorted(node.children, key=lambda c: c.wins/c.visits + self.UCTK*sqrt(2*log2(c.visits)/c.visits))[-1]
+        s = sorted(node.children, key=lambda c: c.wins/c.visits + self.UCTK*sqrt(2*log1p(c.pred.visits)/c.visits))[-1]
         return s  
         
     
@@ -72,11 +78,33 @@ class Player(AbstractPlayer):
             board.doAction(action)
             winner = board.check_winner()
             
+        #self.simulations += 1 
         return winner
     
+    def bestMoveSimulation(self, node):
+        board = deepcopy(node.board)
+        winner = board.check_winner()
+        while (winner is None):
+            actions = board.checkActions()
+            lastEval = node.boardEval(board)
+            for action in actions:
+                board.doAction(action)
+                nowEval = node.boardEval(board)
+                if nowEval >= lastEval:
+                    break
+                board.undoLastAction()
+                
+            winner = board.check_winner()
+            
+        #self.simulations += 1 
+        return winner
+    
+    
     def addWins(self, node, winner):
-        if winner == node.board.current_team:
+        if winner == node.board.enemy_team:
             node.wins += 1
+        elif winner == 'draw':
+            node.wins += 0.5
         node.visits += 1
         
         
