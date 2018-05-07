@@ -9,6 +9,7 @@ class Node:
         self.wins = 0
         self.visits = 0
         self.board = board
+        self.value = 0
         self.action = action
         if pred is None:
             self.depth = 0
@@ -26,7 +27,10 @@ class Node:
         return hash(self.board)
 
     def __str__(self):
-        myString = "move: " + str(self.action) + '\n wins:' + str(self.wins) + '\n visits:' + str(self.visits) + '\n depth:' + str(self.depth)
+        myString = "move: " + str(self.action) + \
+        '\n wins:' + str(self.wins) + \
+        '\n visits:' + str(self.visits) + \
+        '\n depth:' + str(self.depth)
         return myString
 
     # randomly expands an action to return a child node
@@ -37,3 +41,18 @@ class Node:
         child = Node(self, newBoard, action)
         self.children.append(child)
         return child
+    
+    # evaluates a board
+    #def boardEval(self, board):
+        ''' f = no. my teams pieces - no. enemy team pieces
+        '''
+'''        
+        f = board.pieces[board.current_team] - board.pieces[board.enemy_team]
+        value = f
+        self.value = value
+        return value
+
+    # evaluates an action
+    def actionEval(self, board, action):
+        pass
+'''
