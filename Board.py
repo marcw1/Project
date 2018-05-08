@@ -134,11 +134,6 @@ class Board:
         return kills, killed
 
 
-    def removePiece(self, x, y):
-        piece = self.board[y][x]
-        # self.pieces[piece] -= 1
-        self.board[y][x] = "-"
-
     def getPossiblePiecePlaces(self):
         possibleMoves = []
         for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
@@ -146,15 +141,6 @@ class Board:
                 if self.board[y][x] == "-":
                     possibleMoves.append((x, y))
         return possibleMoves
-
-    # Used for scoring
-    def loopThrough(self, method):
-        count = 0
-        for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
-            for y in range(0 + self.n_shrinks, 8 - self.n_shrinks):
-               a, b = method(x, y)
-               count += (a + b)
-        return count
 
     # Move a piece
     def movePiece(self, moveFrom, moveTo):
