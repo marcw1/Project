@@ -2,7 +2,7 @@ from itertools import cycle
 
 class Board:
 
-    teams = ('O', 'B')
+    teams = ('W', 'B')
 
     # makes an empty board
     def __init__(self, size):
@@ -11,6 +11,7 @@ class Board:
         self.pieces = {'W': 0, 'B': 0}
         self.phase = 'placing'
         self.turns = 0
+        self.enemy_team = 'B'
         # makes an iterator to cycle through teams
         self.team_iterator = cycle(Board.teams)
         self.current_team = next(self.team_iterator)
@@ -24,7 +25,7 @@ class Board:
     # finds all possible actions for current team     
     def checkActions(self):
         if self.phase == 'placing':
-            possibleActions = self.checkPiecePlaces()
+            possibleActions = self.getPossiblePiecePlaces()
         elif self.phase == 'moving':
             possibleActions = self.checkMoves()
         return possibleActions  
@@ -52,7 +53,7 @@ class Board:
                
     def getPossiblePiecePlaces(self):   
         possiblePlaces = []
-        if self.current_team == 'O':
+        if self.current_team == 'W':
             yMin = 0 + self.n_shrinks
             yMax = 6
         elif self.current_team == 'B':
@@ -353,7 +354,7 @@ class Board:
         has run out of pieces, decide the winner and transition to the 
         'completed' state
         """
-        n_whites = self.pieces['O']
+        n_whites = self.pieces['W']
         n_blacks = self.pieces['B']
         winner = None
         if self.phase == 'moving':
@@ -362,7 +363,7 @@ class Board:
             elif n_whites < 2 and n_blacks >= 2:
                 winner = 'B'
             elif n_blacks < 2 and n_whites >= 2:
-                winner = 'O'
+                winner = 'W'
             elif n_whites < 2 and n_blacks < 2:
                 winner = 'draw'
         return winner

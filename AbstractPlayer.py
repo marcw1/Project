@@ -5,7 +5,7 @@ class AbstractPlayer(ABC):
 
     def __init__(self, colour):
         self.colour = colour
-        self.board = Board()
+        self.board = Board(64)
 
     # returns an action (placement or movement)
     @abstractmethod
