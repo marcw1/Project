@@ -51,12 +51,14 @@ class Board:
                     possibleMoves.append(move)
         return possibleMoves
                
-    def getPossiblePiecePlaces(self):   
+    def getPossiblePiecePlaces(self, team=None):
+        if team is None:
+            team = self.current_team
         possiblePlaces = []
-        if self.current_team == 'W':
+        if team== 'W':
             yMin = 0
             yMax = 6
-        elif self.current_team == 'B':
+        elif team == 'B':
             yMin = 2
             yMax = 8
         for x in range(0, 8):
