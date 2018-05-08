@@ -1,21 +1,22 @@
-class Node:
-    # predecessor
-    pred = None
-    # path cost g(n)
-    cost = 0
-    # estimated total cost f(n)
-    total = 0
-    # board state
-    board = None
-    # last move made to get here
-    move = None
+from copy import deepcopy
+import random
 
-    def __init__(self, pred, cost, total, board, move):
+class Node:
+
+    def __init__(self, pred, board, action):
         self.pred = pred
-        self.cost = cost
-        self.total = total
+        self.children = []
+        self.wins = 0
+        self.visits = 0
         self.board = board
-        self.move = move
+        self.value = 0
+        self.action = action
+        if pred is None:
+            self.depth = 0
+        else:
+            self.depth = pred.depth + 1
+        self.untriedActions = self.board.checkActions()
+        random.shuffle(self.untriedActions)
 
     # used for min heap
     def __lt__(self, other):
@@ -26,18 +27,32 @@ class Node:
         return hash(self.board)
 
     def __str__(self):
-        myString = str(self.board) + "move: " + str(self.move) + "\ncost: "
-        + str(self.cost) + "\nest: " + str(self.total - self.cost) + "\ntotal: "
-        + str(self.total)
+        myString = "move: " + str(self.action) + \
+        '\n wins:' + str(self.wins) + \
+        '\n visits:' + str(self.visits) + \
+        '\n depth:' + str(self.depth)
         return myString
 
-    # returns a list of child nodes as a result of making all possible moves \
-    # for "O" team
+    # randomly expands an action to return a child node
     def expand(self):
-        children = []
-        moves = self.board.getMoves("O")
-        for move in moves:
-            newBoard = self.board.makeMove(move)
-            child = Node(self, self.cost + 1, self.cost + 1, newBoard, move)
-            children.append(child)
-        return children
+        action = self.untriedActions.pop()
+        newBoard = deepcopy(self.board)
+        newBoard.doAction(action)
+        child = Node(self, newBoard, action)
+        self.children.append(child)
+        return child
+    
+    # evaluates a board
+    #def boardEval(self, board):
+        ''' f = no. my teams pieces - no. enemy team pieces
+        '''
+'''        
+        f = board.pieces[board.current_team] - board.pieces[board.enemy_team]
+        value = f
+        self.value = value
+        return value
+
+    # evaluates an action
+    def actionEval(self, board, action):
+        pass
+'''
