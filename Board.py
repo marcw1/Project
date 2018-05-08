@@ -78,6 +78,7 @@ class Board:
         else:
             self.movePiece(*action)
         # cycles to next team
+        self.enemy_team = self.current_team
         self.current_team = next(self.team_iterator)
         self.turns += 1
         # checks for phase change
@@ -120,13 +121,13 @@ class Board:
 
 
     # returns formatted string of current board state
-    def __str__(self):
+    '''def __str__(self):
         """String representation of the current board state."""
         for row in self.board:
-            print(*row)
+            print(*row)'''
 
     # returns formatted string of current board state
-    '''def __str__(self):
+    def __str__(self):
         """String representation of the current board state."""
         string = "" 
         for i in range(8):
@@ -136,7 +137,7 @@ class Board:
                     string += " "
                 else:
                     string += "\n"
-        return string'''
+        return string
 
 
     def _within_board(self, x, y):

@@ -17,6 +17,7 @@ class Player(AbstractPlayer):
     total_sim = 50
     # exploration parameter for UCT selection
     C = 1
+    temp = 0
     
     def action(self, turns):
         
@@ -24,12 +25,14 @@ class Player(AbstractPlayer):
         root = Node(None, deepcopy(self.board), None)
         node = root
         
+        
         #put shit in the middle first haha
-        if turns < 24:
+        if self.temp < 24:
+            self.temp += 1
             while node.untriedActions != []:
                 child = node.expand()
                 child.boardEval(child.board)
-            best = sorted(node.children, key= lambda c: c.value)[0]
+            best = sorted(node.children, key=lambda c: c.value)[0]
             self.board.doAction(best.action)
             return best.action
         

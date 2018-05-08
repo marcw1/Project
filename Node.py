@@ -16,7 +16,7 @@ class Node:
         else:
             self.depth = pred.depth + 1
         self.untriedActions = self.board.checkActions()
-        random.shuffle(self.untriedActions)
+        #random.shuffle(self.untriedActions)
 
     # used for min heap
     def __lt__(self, other):
@@ -61,9 +61,13 @@ class Node:
             i += (piece[0])*(7-piece[0])*(piece[1])*(7-piece[1])
         j = 0
         for piece in board._squares_with_piece(board.enemy_team):
-            i += (piece[0])*(7-piece[0])*(piece[1])*(7-piece[1])
+            if piece[0] == 4 and piece[1] == 3:
+                j += 100
+            j += (piece[0])*(7-piece[0])*(piece[1])*(7-piece[1])
         
-        value = 10*f + g + h + 100*(i-j)
+        value = 100*f + 1*g - 1*h + 100*i - 100*j
+        #print(value)
+        #print(self.action)
         self.value = value
         return value
 
