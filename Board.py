@@ -57,12 +57,13 @@ class Board:
                 xb, yb = xa + dx, ya + dy
                 xc, yc = xa + 2*dx, ya + 2*dy
                 if self._within_board(xb, yb) and self.board[yb][xb] == '-':
-                    move = (yb, xb)
+                    move = (xb, yb)
+                    possibleMoves.append(((xa, ya), move))
                 elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
-                    move = (yc, xc)
-                    print(move)
-                possibleMoves.append(move)
-        print([possibleMoves[i:i + 2] for i in range(0, len(possibleMoves), 2)])
+                    move = (xc, yc)
+                    possibleMoves.append(((xa, ya),move))
+        # print([possibleMoves[i:i + 4] for i in range(0, len(possibleMoves), 4)])
+        return possibleMoves
 
     def _shrink_board(self):
         """
@@ -125,18 +126,18 @@ class Board:
 
     # adds a piece to the board, returns that piece
     def addPiece(self, team, x, y):
+        kills, killed = 0, 0
         if self.board[y][x] == "-":
             self.board[y][x] = team
+            self.pieces[team] += 1
             kills, killed = self._eliminate_about(x, y)
         return kills, killed
 
-    # returns list of all moves available
-    def getMoves(self, team):
-        moves = []
-        for piece in self.pieces[team]:
-            for move in piece.getMoves(self):
-                moves.append(move)
-        return moves
+
+    def removePiece(self, x, y):
+        piece = self.board[y][x]
+        # self.pieces[piece] -= 1
+        self.board[y][x] = "-"
 
     def getPossiblePiecePlaces(self):
         possibleMoves = []
@@ -154,6 +155,14 @@ class Board:
                a, b = method(x, y)
                count += (a + b)
         return count
+
+    # Move a piece
+    def movePiece(self, moveFrom, moveTo):
+        piece = self.board[moveFrom[1]][moveFrom[0]]
+        self.board[moveFrom[1]][moveFrom[0]] = '-'
+        self.board[moveTo[1]][moveTo[0]] = piece
+        # eliminate
+        self._eliminate_about(moveTo[0], moveTo[1])
 
     def _eliminate_about(self, x, y):
         """
@@ -198,12 +207,12 @@ class Board:
                 cx = square[0] + dx
                 dx = square[1] + dy
                 # include corners for ally traps
-                if self._within_board(ax, bx) and (self.board[bx][ax] == piece or self.board[bx][ax] == 'X') and self.board[dx][cx] == "-":
+                if self._within_board(ax, bx) and \
+                        (self.board[bx][ax] == piece or self.board[bx][ax] == 'X') and self.board[dx][cx] == "-":
                     if self.board[bx][ax] == piece:
                         traps += 0.5
                     else:
                         traps+= 1
-        # each trap is doubled
         return traps
 
     def count_kill_positions(self, piece):
@@ -263,10 +272,10 @@ class Board:
         score += self.count_kill_positions(enemy)
 
         # Player pieces
-        score += sum(1 for square in self._squares_with_piece(player))
+        score += sum(4 for square in self._squares_with_piece(player))
 
         # Enemy piece
-        score -= sum(2 for square in self._squares_with_piece(enemy))
+        score -= sum(3 for square in self._squares_with_piece(enemy))
 
         return score
 
