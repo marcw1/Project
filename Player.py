@@ -7,12 +7,12 @@ class Player:
     enemyPiece = None
     currentBoard = None
     BOARD_SIZE = 64
-    PLACING_PHASE_MOVES = 24
+    PLACING_PHASE_MOVES = 23
     phase = "placing"
     killerMoves = None
     bestMove = None
     bestScore = -float('inf')
-    depth = 3
+    depth = 2
 
 
     def __init__(self, colour):
@@ -27,23 +27,17 @@ class Player:
         self.killerMoves = [[None for x in range(1)] for x in range(self.depth)]
 
 
-        self.currentBoard.addPiece(3, 2, "B")
-        self.currentBoard.addPiece(3, 3, "B")
-        self.currentBoard.addPiece(3, 5, "B")
-        self.currentBoard.addPiece(2, 2, "B")
-        self.currentBoard.addPiece(2, 4, "B")
-        self.currentBoard.addPiece(1, 0, "B")
-        self.currentBoard.addPiece(0, 2, "W")
-        self.currentBoard.__str__()
+        # self.currentBoard.addPiece(3, 2, "B")
+        # self.currentBoard.addPiece(3, 3, "B")
+        # self.currentBoard.addPiece(3, 5, "B")
+        # self.currentBoard.addPiece(2, 2, "B")
+        # self.currentBoard.addPiece(2, 4, "B")
+        # self.currentBoard.addPiece(1, 0, "B")
+        # self.currentBoard.addPiece(0, 2, "W")
+        # self.currentBoard.__str__()
 
 
     def action(self, turns):
-        if self.phase == "placing" and turns > self.PLACING_PHASE_MOVES:
-            self.phase == "moving"
-
-        elif turns in [128, 192]:
-            self.currentBoard._shrink_board()
-
         blank, move = self.ABPruning(self.currentBoard, self.depth, -float('inf'), float('inf'), self.playerPiece)
 
         if type(move[0]) is tuple:
@@ -51,9 +45,15 @@ class Player:
         elif type(move[0]) is int:
             self.currentBoard.addPiece(move[0], move[1], self.playerPiece)
 
-        self.currentBoard.__str__()
-        print(self.currentBoard.pieces)
+        # self.currentBoard.__str__()
+        # print(self.currentBoard.pieces)
+        print("trying move: ", move, self.phase, turns)
 
+        if self.phase == "placing" and turns == 22:
+            self.phase = "moving"
+
+        elif turns in [128, 192]:
+            self.currentBoard._shrink_board()
         return move
 
 
@@ -76,7 +76,7 @@ class Player:
         if self.phase == "placing":
             moves = board.getPossiblePiecePlaces()
         else:
-            moves = board.findAllMoves(player)
+            moves = board.checkMoves(player)
 
         # Killer heuristic
         for slot in range(0, len(self.killerMoves[depth-1])-1):
@@ -109,7 +109,7 @@ class Player:
                 if value > bestVal and depth == self.depth:
                     bestVal = value
                     bestMove = move
-                    print(bestMove)
+                    # print(bestMove)
                 a = max(a, value)
                 if b <= a:
                     self.addKillerMove(depth-1, move)
