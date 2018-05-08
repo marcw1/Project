@@ -49,7 +49,7 @@ class Player:
         # print(self.currentBoard.pieces)
         print("trying move: ", move, self.phase, turns)
 
-        if self.phase == "placing" and turns == 22:
+        if self.phase == "placing" and turns == 22 or turns == 23:
             self.phase = "moving"
 
         elif turns in [128, 192]:
@@ -67,14 +67,14 @@ class Player:
 
 
     def ABPruning(self, board, depth, a, b, player):
-        if depth == 0 or len(self.currentBoard.getPossiblePiecePlaces()) == 0:
+        if depth == 0 or len(self.currentBoard.getPossiblePiecePlaces(player)) == 0:
             return board.evaluateBoard(self.playerPiece), None
 
         bestMove = None
         bestVal = -float('inf')
 
         if self.phase == "placing":
-            moves = board.getPossiblePiecePlaces()
+            moves = board.getPossiblePiecePlaces(player)
         else:
             moves = board.checkMoves(player)
 
