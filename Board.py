@@ -54,12 +54,12 @@ class Board:
     def getPossiblePiecePlaces(self):   
         possiblePlaces = []
         if self.current_team == 'W':
-            yMin = 0 + self.n_shrinks
+            yMin = 0
             yMax = 6
         elif self.current_team == 'B':
-            yMin = 3
-            yMax = 8 - self.n_shrinks
-        for x in range(0 + self.n_shrinks, 8 - self.n_shrinks):
+            yMin = 2
+            yMax = 8
+        for x in range(0, 8):
             for y in range(yMin, yMax):
                 if self.board[y][x] == "-":
                     possiblePlaces.append((x, y))
@@ -124,6 +124,19 @@ class Board:
         """String representation of the current board state."""
         for row in self.board:
             print(*row)
+
+    # returns formatted string of current board state
+    '''def __str__(self):
+        """String representation of the current board state."""
+        string = "" 
+        for i in range(8):
+            for j in range(8):
+                string += self.board[i][j]
+                if j < 7:
+                    string += " "
+                else:
+                    string += "\n"
+        return string'''
 
 
     def _within_board(self, x, y):
