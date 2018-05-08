@@ -8,7 +8,7 @@ class Player:
     currentBoard = None
     BOARD_SIZE = 64
     PLACING_PHASE_MOVES = 24
-    phase = "moving"
+    phase = "placing"
     killerMoves = None
     bestMove = None
     bestScore = -float('inf')
@@ -43,9 +43,13 @@ class Player:
     def action(self, turns):
         if self.phase == "placing" and turns > self.PLACING_PHASE_MOVES:
             self.phase == "moving"
-        depth = 4
-        move = self.ABPruning(self.currentBoard, depth, -float('inf'), float('inf'), self.playerPiece)
-
+        depth = 3
+        blank, move = self.ABPruning(self.currentBoard, depth, -float('inf'), float('inf'), self.playerPiece)
+        if type(move[0]) is tuple:
+            self.currentBoard.movePiece(move[0], move[1])
+        elif type(move[0]) is int:
+            self.currentBoard.addPiece(self.playerPiece, move[0], move[1])
+        self.currentBoard.__str__()
 
 
     def update(self, action):
@@ -53,12 +57,12 @@ class Player:
             self.currentBoard.movePiece(action[0], action[1])
         elif type(action[0]) is int:
             self.currentBoard.addPiece(self.enemyPiece, action[0], action[1])
-
+        self.currentBoard.__str__()
 
 
     def ABPruning(self, board, depth, a, b, player):
         if depth == 0 or len(self.currentBoard.getPossiblePiecePlaces()) == 0:
-            return board.evaluateBoard(self.playerPiece)
+            return board.evaluateBoard(self.playerPiece), None
 
         bestMove = None
         bestVal = -float('inf')
@@ -79,8 +83,9 @@ class Player:
                 else:
                     newBoard.movePiece(move[0], move[1])
 
-                value = max(value, self.ABPruning(newBoard, depth - 1, a, b, self.enemyPiece))
-                if value > bestVal and depth == 4:
+                value = max(value, self.ABPruning(newBoard, depth - 1, a, b, self.enemyPiece)[0])
+                # Hard-coded for now
+                if value > bestVal and depth == 3:
                     bestVal = value
                     bestMove = move
                     print(bestMove)
@@ -104,12 +109,12 @@ class Player:
                 else:
                     newBoard.movePiece(move[0], move[1])
 
-                value = min(value, self.ABPruning(newBoard, depth - 1, a, b, self.playerPiece))
+                value = min(value, self.ABPruning(newBoard, depth - 1, a, b, self.playerPiece)[0])
                 b = min (b, value)
                 if b <= a:
                     break;
 
-        return value
+        return (value, bestMove)
 
 
 t = Player("white")
