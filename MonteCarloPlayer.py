@@ -14,7 +14,7 @@ class Player(AbstractPlayer):
     
     #time_limit = 0.5 
     # total number of simulations allowed
-    total_sim = 500
+    total_sim = 50
     # exploration parameter for UCT selection
     C = 1
     
@@ -23,6 +23,15 @@ class Player(AbstractPlayer):
         #creates a root node
         root = Node(None, deepcopy(self.board), None)
         node = root
+        
+        #put shit in the middle first haha
+        if turns < 24:
+            while node.untriedActions != []:
+                child = node.expand()
+                child.boardEval(child.board)
+            best = sorted(node.children, key= lambda c: c.value)[0]
+            self.board.doAction(best.action)
+            return best.action
         
         #keeps running UCTS until time is up
         '''start_time = time.time()

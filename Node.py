@@ -33,7 +33,7 @@ class Node:
         '\n depth:' + str(self.depth)
         return myString
 
-    # randomly expands an action to return a child node
+    # expands an action to return a child node
     def expand(self):
         action = self.untriedActions.pop()
         newBoard = deepcopy(self.board)
@@ -42,16 +42,32 @@ class Node:
         self.children.append(child)
         return child
     
+    
     # evaluates a board
-    #def boardEval(self, board):
+    def boardEval(self, board):
         ''' f = no. my teams pieces - no. enemy team pieces
+            g = no. of my traps
+            h = no. of enemy's traps
+            i = my piece centrality
+            j = enemy piece centrality
         '''
-'''        
+        
         f = board.pieces[board.current_team] - board.pieces[board.enemy_team]
-        value = f
+        g = board.find_traps(board.current_team)
+        h = board.find_traps(board.enemy_team)
+        i = 0
+        # cycles over board twice as much as it needs to
+        for piece in board._squares_with_piece(board.current_team):
+            i += (piece[0])*(7-piece[0])*(piece[1])*(7-piece[1])
+        j = 0
+        for piece in board._squares_with_piece(board.enemy_team):
+            i += (piece[0])*(7-piece[0])*(piece[1])*(7-piece[1])
+        
+        value = 10*f + g + h + 100*(i-j)
         self.value = value
         return value
 
+'''
     # evaluates an action
     def actionEval(self, board, action):
         pass
