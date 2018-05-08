@@ -25,13 +25,13 @@ class Player:
         self.currentBoard = Board(self.BOARD_SIZE)
         # self.killerMoves = [2][3]
 
-        self.currentBoard.addPiece("B", 3, 2)
-        self.currentBoard.addPiece("B", 3, 3)
-        self.currentBoard.addPiece("B", 3, 5)
-        self.currentBoard.addPiece("B", 2, 2)
-        self.currentBoard.addPiece("B", 2, 4)
-        self.currentBoard.addPiece("B", 1, 0)
-        self.currentBoard.addPiece("W", 0, 2)
+        self.currentBoard.addPiece( 3, 2, "B")
+        self.currentBoard.addPiece( 3, 3, "B")
+        self.currentBoard.addPiece( 3, 5, "B")
+        self.currentBoard.addPiece( 2, 2, "B")
+        self.currentBoard.addPiece( 2, 4, "B")
+        self.currentBoard.addPiece( 1, 0, "B")
+        self.currentBoard.addPiece( 0, 2, "W")
         self.currentBoard.__str__()
 
         # self.ABRoot(self.currentBoard, 3, self.playerPiece)
@@ -48,7 +48,7 @@ class Player:
         if type(move[0]) is tuple:
             self.currentBoard.movePiece(move[0], move[1])
         elif type(move[0]) is int:
-            self.currentBoard.addPiece(self.playerPiece, move[0], move[1])
+            self.currentBoard.addPiece( move[0], move[1], self.playerPiece)
         self.currentBoard.__str__()
 
 
@@ -56,7 +56,7 @@ class Player:
         if type(action[0]) is tuple:
             self.currentBoard.movePiece(action[0], action[1])
         elif type(action[0]) is int:
-            self.currentBoard.addPiece(self.enemyPiece, action[0], action[1])
+            self.currentBoard.addPiece(action[0], action[1], self.enemyPiece, )
         self.currentBoard.__str__()
 
 
@@ -79,9 +79,9 @@ class Player:
                 newBoard = deepcopy(board)
 
                 if self.phase == "placing":
-                    newBoard.addPiece(player, move[0], move[1])
+                    newBoard.addPiece(*move, player)
                 else:
-                    newBoard.movePiece(move[0], move[1])
+                    newBoard.movePiece(*move)
 
                 value = max(value, self.ABPruning(newBoard, depth - 1, a, b, self.enemyPiece)[0])
                 # Hard-coded for now
@@ -105,7 +105,7 @@ class Player:
                 newBoard = deepcopy(board)
 
                 if self.phase == "placing":
-                    newBoard.addPiece(player, move[0], move[1])
+                    newBoard.addPiece( move[0], move[1], player,)
                 else:
                     newBoard.movePiece(move[0], move[1])
 
