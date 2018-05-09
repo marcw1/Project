@@ -14,7 +14,7 @@ class Player(AbstractPlayer):
     
     #time_limit = 0.5 
     # total number of simulations allowed
-    total_sim = 50
+    total_sim = 150
     # exploration parameter for UCT selection
     C = 1
     temp = 0
@@ -27,7 +27,7 @@ class Player(AbstractPlayer):
         
         
         #put shit in the middle first haha
-        if self.temp < 24:
+        if self.temp < 124:
             self.temp += 1
             while node.untriedActions != []:
                 child = node.expand()
