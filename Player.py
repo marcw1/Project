@@ -42,10 +42,6 @@ class Player:
 
         self.currentBoard.doAction(move)
 
-        # self.currentBoard.__str__()
-        # print(self.currentBoard.pieces)
-        print("trying move: ", move, self.phase, turns)
-
         if self.phase == "placing" and turns == 22 or turns == 23:
             self.phase = "moving"
 
@@ -99,7 +95,6 @@ class Player:
                 if value > bestVal and depth == self.depth:
                     bestVal = value
                     bestMove = move
-                    # print(bestMove)
                 a = max(a, value)
                 if b <= a:
                     self.addKillerMove(depth-1, move)

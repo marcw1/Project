@@ -78,7 +78,6 @@ class Board:
         for move in self.pieceMoves:
             if team in self.pieceMoves:
                 moveList.append(self.pieceMoves[move])
-        print(moveList)
         return moveList
                
     def getPossiblePiecePlaces(self, team=None):
@@ -143,8 +142,6 @@ class Board:
         self.pieces2.get(piece).append((moveTo[0], moveTo[1]))
 
         self.pieceMoves.pop(moveFrom[0], moveFrom[1])
-        # self.updatePieceMoves(piece, moveTo[0], moveTo[1])
-        # print(self.pieceMoves)
 
         self.board[moveFrom[1]][moveFrom[0]] = '-'
         self.board[moveTo[1]][moveTo[0]] = piece
