@@ -67,6 +67,7 @@ class Player:
         if self.phase == "placing":
             moves = board.getPossiblePiecePlaces(player)
         else:
+            # moves = board.getAllPieceMovesForTeam(player)
             moves = board.checkMoves(player)
 
         # Killer heuristic
@@ -117,6 +118,3 @@ class Player:
         for i in range(len(self.killerMoves[depth]) - 2, -1, -1):
             self.killerMoves[depth][i + 1] = self.killerMoves[depth][i]
         self.killerMoves[depth][0] = move
-
-t = Player("white")
-t.action(1)

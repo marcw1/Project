@@ -10,6 +10,7 @@ class Board:
         self.n_shrinks = 0
         self.pieces = {'W': 0, 'B': 0}
         self.pieces2 = {'W': [], 'B': []}
+        self.pieceMoves = { }
         self.phase = 'placing'
         self.turns = 0
         self.enemy_team = 'B'
@@ -51,6 +52,34 @@ class Board:
                     move = ((xa, ya), (xc, yc))
                     possibleMoves.append(move)
         return possibleMoves
+
+    def updatePieceMoves(self, piece, x, y):
+        possibleMoves = []
+        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+            # is the adjacent square unoccupied?
+            xb, yb = x + dx, y + dy
+            xc, yc = x + 2 * dx, y + 2 * dy
+            if self._within_board(xb, yb) and self.board[yb][xb] == '-':
+                move = ((x, y), (xb, yb))
+                possibleMoves.append(move)
+            elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
+                move = ((x, y), (xc, yc))
+                possibleMoves.append(move)
+
+        if (x, y) not in self.pieceMoves.keys():
+            self.pieceMoves.update({(piece, x, y): possibleMoves})
+        return possibleMoves
+
+    def removePieceMoves(self, piece, x, y):
+        self.pieceMoves.pop((piece, x, y))
+
+    def getAllPieceMovesForTeam(self, team):
+        moveList = []
+        for move in self.pieceMoves:
+            if team in self.pieceMoves:
+                moveList.append(self.pieceMoves[move])
+        print(moveList)
+        return moveList
                
     def getPossiblePiecePlaces(self, team=None):
         if team is None:
@@ -100,6 +129,7 @@ class Board:
         kills, killed = 0, 0
         if self.board[y][x] == "-":
             self.board[y][x] = piece
+            # self.updatePieceMoves(piece, x, y)
             self.pieces[piece] += 1
             self.pieces2.get(piece).append((x, y))
             kills, killed = self._eliminate_about(x, y)
@@ -111,6 +141,10 @@ class Board:
 
         self.pieces2.get(piece).remove((moveFrom[0], moveFrom[1]))
         self.pieces2.get(piece).append((moveTo[0], moveTo[1]))
+
+        self.pieceMoves.pop(moveFrom[0], moveFrom[1])
+        # self.updatePieceMoves(piece, moveTo[0], moveTo[1])
+        # print(self.pieceMoves)
 
         self.board[moveFrom[1]][moveFrom[0]] = '-'
         self.board[moveTo[1]][moveTo[0]] = piece
@@ -133,19 +167,6 @@ class Board:
         """String representation of the current board state."""
         for row in self.board:
             print(*row)
-
-    # returns formatted string of current board state
-    # def __str__(self):
-    #     """String representation of the current board state."""
-    #     string = ""
-    #     for i in range(8):
-    #         for j in range(8):
-    #             string += self.board[i][j]
-    #             if j < 7:
-    #                 string += " "
-    #             else:
-    #                 string += "\n"
-    #     return string
 
 
     def _within_board(self, x, y):
@@ -177,6 +198,7 @@ class Board:
             for square in [(i, s), (s, i), (i, 7 - s), (7 - s, i)]:
                 x, y = square
                 piece = self.board[y][x]
+                # self.removePieceMoves(piece, x, y)
                 if piece in self.pieces2.keys():
                     self.pieces[piece] -= 1
                     self.pieces2.get(piece).remove((x, y))
@@ -189,6 +211,7 @@ class Board:
         for corner in [(s, s), (s, 7 - s), (7 - s, 7 - s), (7 - s, s)]:
             x, y = corner
             piece = self.board[y][x]
+            # self.removePieceMoves(piece, x, y)
             if piece in self.pieces.keys():
                 self.pieces2.get(piece).remove((x, y))
                 self.pieces[piece] -= 1
@@ -246,6 +269,7 @@ class Board:
             if targetval in targets:
                 if self._surrounded(target_x, target_y, -dx, -dy):
                     self.board[target_y][target_x] = '-'
+                    # self.removePieceMoves(targetval,target_x, target_y)
                     self.pieces[targetval] -= 1
                     self.pieces2.get(targetval).remove((target_x, target_y))
                     gotKill = 1
@@ -256,6 +280,7 @@ class Board:
             if self._surrounded(x, y, 1, 0) or self._surrounded(x, y, 0, 1):
                 self.board[y][x] = '-'
                 self.pieces2.get(piece).remove((x, y))
+                # self.removePieceMoves(piece, x, y)
                 self.pieces[piece] -= 1
                 gotKilled = 1
 
