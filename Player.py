@@ -67,8 +67,8 @@ class Player:
         if self.phase == "placing":
             moves = board.getPossiblePiecePlaces(player)
         else:
-            # moves = board.getAllPieceMovesForTeam(player)
-            moves = board.checkMoves(player)
+            moves = board.getAllPieceMovesForTeam(self.playerPiece)
+            # moves = board.checkMoves(player)
 
         # Killer heuristic
         for slot in range(0, len(self.killerMoves[depth-1])-1):
@@ -118,3 +118,4 @@ class Player:
         for i in range(len(self.killerMoves[depth]) - 2, -1, -1):
             self.killerMoves[depth][i + 1] = self.killerMoves[depth][i]
         self.killerMoves[depth][0] = move
+
