@@ -40,10 +40,7 @@ class Player:
     def action(self, turns):
         blank, move = self.ABPruning(self.currentBoard, self.depth, -float('inf'), float('inf'), self.playerPiece)
 
-        if type(move[0]) is tuple:
-            self.currentBoard.movePiece(move[0], move[1])
-        elif type(move[0]) is int:
-            self.currentBoard.addPiece(move[0], move[1], self.playerPiece)
+        self.currentBoard.doAction(move)
 
         # self.currentBoard.__str__()
         # print(self.currentBoard.pieces)
@@ -52,17 +49,11 @@ class Player:
         if self.phase == "placing" and turns == 22 or turns == 23:
             self.phase = "moving"
 
-        elif turns in [128, 192]:
-            self.currentBoard._shrink_board()
         return move
 
 
     def update(self, action):
-        if type(action[0]) is tuple:
-            self.currentBoard.movePiece(action[0], action[1])
-        elif type(action[0]) is int:
-            self.currentBoard.addPiece(action[0], action[1], self.enemyPiece)
-        self.currentBoard.__str__()
+        self.currentBoard.doAction(action)
 
 
 
@@ -92,14 +83,12 @@ class Player:
                killerMoves.append(killerMove)
 
         moves = killerMoves + moves
+        value = 0
 
         for move in moves:
             newBoard = deepcopy(board)
 
-            if self.phase == "placing":
-                newBoard.addPiece(move[0], move[1], player)
-            else:
-                newBoard.movePiece(move[0], move[1])
+            newBoard.doAction(move)
 
             if player == self.playerPiece:
                 value = -float('inf')
