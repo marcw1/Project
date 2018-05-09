@@ -9,6 +9,7 @@ class Board:
         
         self.n_shrinks = 0
         self.pieces = {'W': 0, 'B': 0}
+        self.pieces2 = {'W': [], 'B': []}
         self.phase = 'placing'
         self.turns = 0
         self.enemy_team = 'B'
@@ -100,12 +101,17 @@ class Board:
         if self.board[y][x] == "-":
             self.board[y][x] = piece
             self.pieces[piece] += 1
+            self.pieces2.get(piece).append((x, y))
             kills, killed = self._eliminate_about(x, y)
         return kills, killed   
     
     # moves a piece
     def movePiece(self, moveFrom, moveTo):
         piece = self.board[moveFrom[1]][moveFrom[0]]
+
+        self.pieces2.get(piece).remove((moveFrom[0], moveFrom[1]))
+        self.pieces2.get(piece).append((moveTo[0], moveTo[1]))
+
         self.board[moveFrom[1]][moveFrom[0]] = '-'
         self.board[moveTo[1]][moveTo[0]] = piece
         # eliminate
@@ -123,23 +129,23 @@ class Board:
 
 
     # returns formatted string of current board state
-    '''def __str__(self):
-        """String representation of the current board state."""
-        for row in self.board:
-            print(*row)'''
-
-    # returns formatted string of current board state
     def __str__(self):
         """String representation of the current board state."""
-        string = "" 
-        for i in range(8):
-            for j in range(8):
-                string += self.board[i][j]
-                if j < 7:
-                    string += " "
-                else:
-                    string += "\n"
-        return string
+        for row in self.board:
+            print(*row)
+
+    # returns formatted string of current board state
+    # def __str__(self):
+    #     """String representation of the current board state."""
+    #     string = ""
+    #     for i in range(8):
+    #         for j in range(8):
+    #             string += self.board[i][j]
+    #             if j < 7:
+    #                 string += " "
+    #             else:
+    #                 string += "\n"
+    #     return string
 
 
     def _within_board(self, x, y):
@@ -171,8 +177,9 @@ class Board:
             for square in [(i, s), (s, i), (i, 7 - s), (7 - s, i)]:
                 x, y = square
                 piece = self.board[y][x]
-                if piece in self.pieces:
+                if piece in self.pieces2.keys():
                     self.pieces[piece] -= 1
+                    self.pieces2.get(piece).remove((x, y))
                 self.board[y][x] = ' '
 
         # we have now shrunk the board once more!
@@ -182,7 +189,8 @@ class Board:
         for corner in [(s, s), (s, 7 - s), (7 - s, 7 - s), (7 - s, s)]:
             x, y = corner
             piece = self.board[y][x]
-            if piece in self.pieces:
+            if piece in self.pieces.keys():
+                self.pieces2.get(piece).remove((x, y))
                 self.pieces[piece] -= 1
             self.board[y][x] = 'X'
             self._eliminate_about(x, y)
@@ -239,13 +247,15 @@ class Board:
                 if self._surrounded(target_x, target_y, -dx, -dy):
                     self.board[target_y][target_x] = '-'
                     self.pieces[targetval] -= 1
+                    self.pieces2.get(targetval).remove((target_x, target_y))
                     gotKill = 1
 
         gotKilled = 0
         # Check if the current piece is surrounded and should be eliminated
-        if piece in self.pieces:
+        if piece in self.pieces.keys():
             if self._surrounded(x, y, 1, 0) or self._surrounded(x, y, 0, 1):
                 self.board[y][x] = '-'
+                self.pieces2.get(piece).remove((x, y))
                 self.pieces[piece] -= 1
                 gotKilled = 1
 
@@ -324,6 +334,15 @@ class Board:
 
         # Positions to kill enemy
         score += self.count_kill_positions(enemy)
+
+        for square in self.pieces2.get(player):
+            # value squares as close to the middle as possible
+            score -= (abs(4-square[0]) + abs(4-square[1]))
+            # if square[0] in badSquares or square[1] in badSquares:
+            #     score -= 3
+            # if square[0] in goodSquares or square[1] in goodSquares:
+            #     score += 4
+
 
         # Player pieces
         score += sum(4 for square in self._squares_with_piece(player))
