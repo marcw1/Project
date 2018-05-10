@@ -3,14 +3,14 @@ from itertools import cycle
 class Board:
 
     teams = ('W', 'B')
+    direc = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     # makes an empty board
     def __init__(self, size):
         
         self.n_shrinks = 0
         self.pieces = {'W': 0, 'B': 0}
-        self.pieces2 = {'W': [], 'B': []}
-        self.pieceMoves = { }
+        self.pieceMoves = {'W':{}, 'B':{}}
         self.phase = 'placing'
         self.turns = 0
         self.enemy_team = 'B'
@@ -30,6 +30,7 @@ class Board:
             possibleActions = self.getPossiblePiecePlaces()
         elif self.phase == 'moving':
             possibleActions = self.checkMoves()
+            #possibleActions = self.getAllPieceMovesForTeam(self.current_team)
         return possibleActions  
     
     
@@ -53,31 +54,78 @@ class Board:
                     possibleMoves.append(move)
         return possibleMoves
 
-    def updatePieceMoves(self, piece, x, y):
-        possibleMoves = []
-        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
-            # is the adjacent square unoccupied?
+
+    
+    def updateMovesAt(self, x, y, dir=None):
+        ''' updates the moves of a piece at (x, y)
+            optionally only in direction dir
+        '''
+        if self._within_board(x, y) and (self.board[y][x] in Board.teams):
+            piece = self.board[y][x]
+            #print(self.current_team)
+            #str(self)
+            #print((x,y))
+            
+            # update moves in 4 directions    
+            if dir is None:
+                possibleMoves = []
+                for dx, dy in Board.direc:
+                    # is the adjacent square unoccupied?
+                    xb, yb = x + dx, y + dy
+                    xc, yc = x + 2 * dx, y + 2 * dy
+                    if self._within_board(xb, yb) and self.board[yb][xb] == '-':
+                        move = (xb, yb)
+                        possibleMoves.append(move)
+                    elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
+                        move = (xc, yc)
+                        possibleMoves.append(move)
+                        
+                self.pieceMoves[piece][(x,y)] = possibleMoves
+                #print(self.pieceMoves[piece][(x,y)])
+                        
+            # or update in just 1 direction
+            '''else:
+                (dx, dy) = dir
+                 # is the adjacent square unoccupied?
+                xb, yb = x + dx, y + dy
+                xc, yc = x + 2 * dx, y + 2 * dy    
+                moves = self.pieceMoves[piece][(x,y)]
+                #delete first
+                if (xb, yb) in moves:
+                    moves.remove((xb, yb))
+                if (xc, yc) in moves:
+                    moves.remove((xc, yc))
+                #print(moves)               
+                    
+                if self._within_board(xb, yb) and self.board[yb][xb] == '-':
+                    moves.append((xb, yb))
+                    #print(str(dir) + str((x,y) )+ str((xb, yb)))
+                elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
+                    moves.append((xc, yc))
+                    #print((xc, yc))'''
+
+        
+    def updateMovesAround(self, x, y):
+        ''' updates the moves of (x,y) and
+            updates the moves of pieces around (x,y)
+            but only in the direction of (x,y)
+        '''
+        self.updateMovesAt(x, y)
+        for dx, dy in Board.direc:
             xb, yb = x + dx, y + dy
             xc, yc = x + 2 * dx, y + 2 * dy
-            if self._within_board(xb, yb) and self.board[yb][xb] == '-':
-                move = ((x, y), (xb, yb))
-                possibleMoves.append(move)
-            elif self._within_board(xc, yc) and self.board[yc][xc] == '-':
-                move = ((x, y), (xc, yc))
-                possibleMoves.append(move)
-
-        if (x, y) not in self.pieceMoves.keys():
-            self.pieceMoves.update({(piece, x, y): possibleMoves})
-        return possibleMoves
+           # dir = (x-xb,y-yb)
+            self.updateMovesAt(xb, yb)
+            self.updateMovesAt(xc, yc)
 
     def removePieceMoves(self, piece, x, y):
-        self.pieceMoves.pop((piece, x, y))
+        del self.pieceMoves[piece][(x, y)]
 
-    def getAllPieceMovesForTeam(self, team):
+    def getAllPieceMovesForTeam(self, team=None):
         moveList = []
-        for move in self.pieceMoves:
-            if team in self.pieceMoves:
-                moveList.append(self.pieceMoves[move])
+        for moveFrom in self.pieceMoves[team]:
+            for moveTo in self.pieceMoves[team][moveFrom]:
+                moveList.append((moveFrom, moveTo))
         return moveList
                
     def getPossiblePiecePlaces(self, team=None):
@@ -118,7 +166,9 @@ class Board:
             self.turns = 0
         # checks for board shrink
         elif self.turns in [128, 192]:
-            self._shrink_board()   
+            self._shrink_board()
+        #print(self.current_team)
+        #str(self)
                
     # adds a piece to the board
     def addPiece(self, x, y, piece=None):
@@ -128,25 +178,30 @@ class Board:
         kills, killed = 0, 0
         if self.board[y][x] == "-":
             self.board[y][x] = piece
-            # self.updatePieceMoves(piece, x, y)
             self.pieces[piece] += 1
-            self.pieces2.get(piece).append((x, y))
+            #self.pieces2.get(piece).append((x, y))
+            self.updateMovesAround(x, y)
             kills, killed = self._eliminate_about(x, y)
+            self.updateMovesAround(x, y)
         return kills, killed   
     
     # moves a piece
     def movePiece(self, moveFrom, moveTo):
         piece = self.board[moveFrom[1]][moveFrom[0]]
 
-        self.pieces2.get(piece).remove((moveFrom[0], moveFrom[1]))
-        self.pieces2.get(piece).append((moveTo[0], moveTo[1]))
-
-        self.pieceMoves.pop(moveFrom[0], moveFrom[1])
-
+        #self.pieces2.get(piece).remove((moveFrom[0], moveFrom[1]))
+        #self.pieces2.get(piece).append((moveTo[0], moveTo[1]))
         self.board[moveFrom[1]][moveFrom[0]] = '-'
         self.board[moveTo[1]][moveTo[0]] = piece
+        
+        self.updateMovesAround(*moveFrom)
+        self.updateMovesAround(*moveTo)
         # eliminate
         self._eliminate_about(moveTo[0], moveTo[1])
+        # update around
+        self.removePieceMoves(piece, *moveFrom)
+        self.updateMovesAround(*moveFrom)
+        self.updateMovesAround(*moveTo)
     
     def _squares_with_piece(self, piece):
         """
@@ -164,6 +219,7 @@ class Board:
         """String representation of the current board state."""
         for row in self.board:
             print(*row)
+        return 'eh'
 
 
     def _within_board(self, x, y):
@@ -195,10 +251,10 @@ class Board:
             for square in [(i, s), (s, i), (i, 7 - s), (7 - s, i)]:
                 x, y = square
                 piece = self.board[y][x]
-                # self.removePieceMoves(piece, x, y)
-                if piece in self.pieces2.keys():
+                if piece in Board.teams:
+                    self.removePieceMoves(piece, x, y)
                     self.pieces[piece] -= 1
-                    self.pieces2.get(piece).remove((x, y))
+                    #self.pieces2.get(piece).remove((x, y))
                 self.board[y][x] = ' '
 
         # we have now shrunk the board once more!
@@ -208,12 +264,18 @@ class Board:
         for corner in [(s, s), (s, 7 - s), (7 - s, 7 - s), (7 - s, s)]:
             x, y = corner
             piece = self.board[y][x]
-            # self.removePieceMoves(piece, x, y)
-            if piece in self.pieces.keys():
-                self.pieces2.get(piece).remove((x, y))
+            if piece in Board.teams:
+                self.removePieceMoves(piece, x, y)
+                #self.pieces2.get(piece).remove((x, y))
                 self.pieces[piece] -= 1
             self.board[y][x] = 'X'
+            self.updateMovesAround(x, y)
             self._eliminate_about(x, y)
+            
+        # redo all piece moves
+        for team in Board.teams:
+            for piece in self.pieceMoves[team]:
+                self.updateMovesAt(x, y)
 
     def _surrounded(self, x, y, dx, dy):
         """
@@ -265,21 +327,29 @@ class Board:
                 targetval = self.board[target_y][target_x]
             if targetval in targets:
                 if self._surrounded(target_x, target_y, -dx, -dy):
+                    # remove their moves and update around
                     self.board[target_y][target_x] = '-'
-                    # self.removePieceMoves(targetval,target_x, target_y)
+                    self.removePieceMoves(targetval,target_x, target_y)
+                    self.updateMovesAround(target_x, target_y)
                     self.pieces[targetval] -= 1
-                    self.pieces2.get(targetval).remove((target_x, target_y))
+                    #update around here
+                    #self.pieces2.get(targetval).remove((target_x, target_y))
                     gotKill = 1
 
         gotKilled = 0
         # Check if the current piece is surrounded and should be eliminated
-        if piece in self.pieces.keys():
+        if piece in Board.teams:
             if self._surrounded(x, y, 1, 0) or self._surrounded(x, y, 0, 1):
+                # remove its moves and update around
                 self.board[y][x] = '-'
-                self.pieces2.get(piece).remove((x, y))
-                # self.removePieceMoves(piece, x, y)
+                self.updateMovesAround(x, y)
+                self.removePieceMoves(piece, x, y)
+                #self.pieces2.get(piece).remove((x, y))
                 self.pieces[piece] -= 1
                 gotKilled = 1
+            else:
+                # or just update its moves
+                self.updateMovesAround(x, y)
 
         return gotKill, gotKilled
 
@@ -357,7 +427,7 @@ class Board:
         # Positions to kill enemy
         score += self.count_kill_positions(enemy)
 
-        for square in self.pieces2.get(player):
+        for square in self.pieceMoves[player]:
             # value squares as close to the middle as possible
             score -= (abs(4-square[0]) + abs(4-square[1]))
             # if square[0] in badSquares or square[1] in badSquares:

@@ -65,7 +65,7 @@ class Node:
                 j += 100
             j += (piece[0])*(7-piece[0])*(piece[1])*(7-piece[1])
         
-        value = 100*f + 1*g - 1*h + 0.1*i - 0.1*j
+        value = 100*f + 1*g - 1*h + 10*i - 0.1*j
         #print(value)
         #print(self.action)
         self.value = value

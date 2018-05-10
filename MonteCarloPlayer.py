@@ -27,7 +27,7 @@ class Player(AbstractPlayer):
         
         
         #put shit in the middle first haha
-        if self.temp < 124:
+        if self.temp <15:
             self.temp += 1
             while node.untriedActions != []:
                 child = node.expand()
